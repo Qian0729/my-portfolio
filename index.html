@@ -3,172 +3,1101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>你的名字 · 个人作品集</title>
+<title>Your Name — Portfolio</title>
+<meta name="description" content="Digital Product Design · UI/UX · Interaction Art · AI Creative · 3D / Digital Twin">
+
+<!-- ============================================================
+  个人作品集 · 单文件应用（无构建、无框架、无付费依赖）
+  结构索引：
+    1. <style>  设计系统 + 全部样式
+    2. <main>   页面容器（内容由 JS 渲染）
+    3. <script> 按顺序：
+       ① CONFIG   站点与个人基础信息（改这里）
+       ② PROJECTS 六个项目的内容与图片路径（改这里）
+       ③ EXPERIMENTS 创意实验内容
+       ④ I18N     界面文案 zh / en
+       ⑤ 渲染器   各页面模板函数
+       ⑥ 路由     hash 路由 (#/ #/work/:id #/about #/experiments #/contact)
+       ⑦ 交互     语言切换 / 滚动淡入 / 移动菜单 / 生成艺术画布
+  图片说明：封面与详情图均指向 images/ 目录，
+  文件缺失时自动显示灰色占位块，不会伪造任何真实成果。
+============================================================ -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
-  :root {
-    --grad: linear-gradient(135deg, #6366f1, #8b5cf6);
-    --text-main: #1e293b;
-    --text-sub: #64748b;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ============ 1. 设计系统 ============ */
+:root{
+  --bg:#ffffff;
+  --ink:#111111;          /* 主文字 */
+  --ink-60:#6f6f6f;       /* 次级文字 */
+  --ink-40:#a8a8a8;
+  --line:#e6e6e6;         /* 辅助线 */
+  --panel:#f5f5f4;        /* 占位/浅底 */
+  --gutter:clamp(20px,4vw,64px);
+  --maxw:1440px;
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --font-en:"Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-cn:"Noto Sans SC","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--font-en),var(--font-cn);
+  font-size:16px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+::selection{background:#111;color:#fff}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+button{font:inherit;background:none;border:0;cursor:pointer;color:inherit}
 
-  body {
-    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    color: var(--text-main);
-    background: #f8fafc;
-    line-height: 1.6;
-  }
+/* 中文语境下的排版微调 */
+html[lang="zh-CN"] body{font-family:var(--font-cn),var(--font-en);letter-spacing:.01em}
 
-  /* ===== 顶部 Hero ===== */
-  header {
-    text-align: center;
-    padding: 90px 20px 70px;
-    background: var(--grad);
-    color: #fff;
-  }
-  .avatar {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid rgba(255, 255, 255, 0.7);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    margin-bottom: 28px;
-  }
-  header h1 {
-    font-size: 44px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    margin-bottom: 14px;
-  }
-  header p.tagline {
-    font-size: 22px;
-    opacity: 0.92;
-    font-weight: 300;
-  }
+/* 通用工具类 */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12px;letter-spacing:.08em}
+.eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-60);font-weight:500}
+.sec{border-top:1px solid var(--line);padding:clamp(64px,9vw,128px) 0}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:clamp(36px,5vw,72px)}
+.sec-head h2{font-size:clamp(22px,2.6vw,34px);font-weight:600;letter-spacing:-.01em}
+.sec-head .count{color:var(--ink-40)}
+.grid{display:grid;gap:clamp(24px,3vw,56px)}
 
-  /* ===== 作品区 ===== */
-  main {
-    max-width: 1080px;
-    margin: 0 auto;
-    padding: 70px 24px;
-  }
-  main h2 {
-    font-size: 32px;
-    text-align: center;
-    margin-bottom: 48px;
-    background: var(--grad);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 32px;
-  }
-  .card {
-    background: #fff;
-    border-radius: 18px;
-    overflow: hidden;
-    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.12);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-  }
-  .card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 16px 40px rgba(139, 92, 246, 0.25);
-  }
-  .card img {
-    width: 100%;
-    height: 190px;
-    object-fit: cover;
-    display: block;
-  }
-  .card-body { padding: 22px 24px 26px; }
-  .card h3 { font-size: 20px; margin-bottom: 8px; }
-  .card p { font-size: 15px; color: var(--text-sub); }
+/* 悬停下划线动画（细腻反馈） */
+.u-link{position:relative;display:inline-block}
+.u-link::after{
+  content:"";position:absolute;left:0;bottom:-2px;width:100%;height:1px;
+  background:currentColor;transform:scaleX(0);transform-origin:right;
+  transition:transform .45s var(--ease);
+}
+.u-link:hover::after{transform:scaleX(1);transform-origin:left}
 
-  /* ===== 底部联系方式 ===== */
-  footer {
-    text-align: center;
-    padding: 48px 20px;
-    background: #fff;
-    border-top: 1px solid #e2e8f0;
-  }
-  footer .links {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 36px;
-    font-size: 20px;
-  }
-  footer a {
-    color: var(--text-main);
-    text-decoration: none;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    transition: color 0.2s;
-  }
-  footer a:hover { color: #6366f1; }
-  footer .copy {
-    margin-top: 26px;
-    font-size: 14px;
-    color: var(--text-sub);
-  }
+/* 滚动淡入 */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+}
 
-  @media (max-width: 600px) {
-    header h1 { font-size: 32px; }
-    header p.tagline { font-size: 17px; }
-  }
+/* ============ 2. 导航 ============ */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(255,255,255,.88);backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter);
+  height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-weight:600;font-size:15px;letter-spacing:.04em;display:flex;align-items:baseline;gap:8px}
+.logo em{font-style:normal;color:var(--ink-40);font-weight:400;font-size:12px;letter-spacing:.14em}
+.nav-menu{display:flex;gap:clamp(20px,2.4vw,40px);align-items:center}
+.nav-menu a{font-size:13px;letter-spacing:.06em;color:var(--ink-60);transition:color .3s}
+.nav-menu a:hover,.nav-menu a.active{color:var(--ink)}
+.nav-right{display:flex;align-items:center;gap:20px}
+.lang-btn{
+  font-size:12px;letter-spacing:.1em;border:1px solid var(--line);
+  padding:6px 14px;border-radius:999px;color:var(--ink-60);
+  transition:border-color .3s,color .3s;
+}
+.lang-btn:hover{border-color:var(--ink);color:var(--ink)}
+.burger{display:none;width:28px;height:16px;position:relative}
+.burger span{position:absolute;left:0;right:0;height:1px;background:var(--ink);transition:transform .35s var(--ease),top .35s var(--ease)}
+.burger span:nth-child(1){top:0}.burger span:nth-child(2){top:8px}.burger span:nth-child(3){top:16px}
+.burger.open span:nth-child(1){top:8px;transform:rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){top:8px;transform:rotate(-45deg)}
+.mobile-menu{
+  display:none;position:fixed;top:64px;left:0;right:0;z-index:99;
+  background:#fff;border-bottom:1px solid var(--line);
+  padding:12px var(--gutter) 28px;
+}
+.mobile-menu a{display:block;padding:14px 0;font-size:16px;border-bottom:1px solid var(--line)}
+.mobile-menu a:last-child{border-bottom:0}
+.mobile-menu.show{display:block;animation:drop .35s var(--ease)}
+@keyframes drop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+/* ============ 3. 首页 Hero ============ */
+.hero{padding:clamp(140px,20vh,220px) 0 clamp(64px,9vw,110px)}
+.hero h1{
+  font-size:clamp(40px,7.6vw,110px);line-height:1.04;letter-spacing:-.03em;font-weight:600;
+  max-width:14ch;
+}
+.hero h1 .thin{font-weight:400;color:var(--ink-40)}
+.hero-sub{
+  margin-top:clamp(28px,4vw,48px);display:flex;flex-wrap:wrap;gap:clamp(24px,5vw,96px);align-items:flex-start;
+}
+.hero-sub .zh{font-size:clamp(16px,1.5vw,20px);color:var(--ink-60);max-width:34em}
+.hero-meta{display:flex;flex-direction:column;gap:10px;min-width:180px}
+.hero-meta span{font-size:13px;color:var(--ink-60);letter-spacing:.04em}
+.hero-rule{margin-top:clamp(48px,7vw,96px);border-top:1px solid var(--line);padding-top:20px;
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.hero-rule span{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-40)}
+
+/* ============ 4. 作品网格 ============ */
+.works-grid{grid-template-columns:1fr 1fr}
+.card{display:block;position:relative}
+.card .frame{
+  aspect-ratio:4/3;overflow:hidden;background:var(--panel);position:relative;
+  border:1px solid transparent;transition:border-color .4s var(--ease);
+}
+.card:hover .frame{border-color:var(--ink)}
+.card .frame img{width:100%;height:100%;object-fit:cover;
+  transition:transform 1s var(--ease),opacity .6s ease;transform:scale(1.001)}
+.card:hover .frame img{transform:scale(1.04)}
+/* 图片缺失时的占位（不伪造真实视觉） */
+.card .ph,.ph-big{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:20px;color:var(--ink-40);font-size:12px;letter-spacing:.12em;
+}
+.card .frame.noimg img{display:none}
+.card .ph{display:none}
+.card .frame.noimg .ph{display:flex}
+.card-info{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  padding-top:18px;border-top:1px solid var(--line);margin-top:16px}
+.card-info h3{font-size:clamp(17px,1.6vw,21px);font-weight:600;letter-spacing:-.01em}
+.card-info .tags{color:var(--ink-40);font-size:12px;letter-spacing:.08em;text-align:right;white-space:nowrap}
+.card-idx{position:absolute;top:14px;left:16px;font-size:11px;letter-spacing:.14em;color:#fff;mix-blend-mode:difference}
+
+/* ============ 5. 项目详情页 ============ */
+.detail-hero{padding:clamp(110px,16vh,170px) 0 clamp(40px,6vw,72px)}
+.detail-hero h1{font-size:clamp(32px,5.4vw,72px);letter-spacing:-.025em;line-height:1.08;font-weight:600;max-width:16ch}
+.detail-hero .lead{margin-top:24px;font-size:clamp(16px,1.6vw,20px);color:var(--ink-60);max-width:44em}
+.detail-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:24px 0;margin:clamp(40px,6vw,72px) 0}
+.detail-meta dt{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-40);margin-bottom:8px}
+.detail-meta dd{font-size:14px}
+.detail-body .block{margin-bottom:clamp(56px,8vw,110px)}
+.detail-body h2{
+  font-size:13px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+  color:var(--ink-60);margin-bottom:22px;display:flex;align-items:center;gap:14px;
+}
+.detail-body h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.detail-body p{max-width:60em;font-size:clamp(15px,1.35vw,17px);color:#333;margin-bottom:1em}
+.detail-body ul{list-style:none;max-width:60em}
+.detail-body ul li{padding:14px 0;border-bottom:1px solid var(--line);font-size:15px;
+  display:flex;gap:16px;color:#333}
+.detail-body ul li .n{color:var(--ink-40);font-size:12px;padding-top:3px;min-width:24px}
+.figure{aspect-ratio:16/9;background:var(--panel);position:relative;overflow:hidden}
+.figure.tall{aspect-ratio:4/3}
+.figure img{width:100%;height:100%;object-fit:cover}
+.figure.noimg img{display:none}
+.ph-big{justify-content:space-between}
+.ph-big .big-idx{font-size:clamp(40px,6vw,88px);font-weight:600;letter-spacing:-.03em;line-height:1;align-self:flex-start}
+.figure-caption{margin-top:12px;font-size:12px;color:var(--ink-40);letter-spacing:.06em}
+.fig-row{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,2vw,32px)}
+.next-proj{border-top:1px solid var(--line)}
+.next-link{display:flex;justify-content:space-between;align-items:center;
+  padding:clamp(36px,5vw,64px) 0;transition:padding-left .5s var(--ease)}
+.next-link:hover{padding-left:16px}
+.next-link .dir{font-size:12px;letter-spacing:.2em;color:var(--ink-40);text-transform:uppercase}
+.next-link h3{font-size:clamp(22px,3vw,40px);font-weight:600;letter-spacing:-.02em;margin-top:8px}
+.next-link .arrow{font-size:clamp(24px,3vw,40px);transition:transform .5s var(--ease)}
+.next-link:hover .arrow{transform:translateX(10px)}
+
+/* ============ 6. About ============ */
+.about-grid{display:grid;grid-template-columns:5fr 7fr;gap:clamp(40px,6vw,110px)}
+.about-grid .col-l{position:sticky;top:110px;align-self:start}
+.about-grid h1{font-size:clamp(28px,3.4vw,44px);letter-spacing:-.02em;line-height:1.2;font-weight:600;margin-bottom:28px}
+.about-grid .portrait{aspect-ratio:4/5;background:var(--panel);position:relative;overflow:hidden;margin-top:36px}
+.about-grid .portrait img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.02)}
+.about-grid .portrait.noimg img{display:none}
+.about-grid p{color:#333;margin-bottom:1.2em;max-width:58em}
+.skills{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:0;margin-top:14px}
+.skills div{border-top:1px solid var(--line);padding:18px 0}
+.skills dt{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-40);margin-bottom:10px}
+.skills dd{font-size:14px;color:#333}
+
+/* ============ 7. Experiments ============ */
+.exp-list{border-top:1px solid var(--line)}
+.exp-item{border-bottom:1px solid var(--line)}
+.exp-item summary{
+  display:grid;grid-template-columns:64px 1fr auto auto;gap:clamp(12px,3vw,40px);align-items:baseline;
+  padding:clamp(22px,3vw,36px) 0;cursor:pointer;list-style:none;
+  transition:padding-left .45s var(--ease);
+}
+.exp-item summary::-webkit-details-marker{display:none}
+.exp-item summary:hover{padding-left:14px}
+.exp-item summary .no{color:var(--ink-40);font-size:12px;letter-spacing:.12em}
+.exp-item summary h3{font-size:clamp(18px,2.2vw,28px);font-weight:600;letter-spacing:-.015em}
+.exp-item summary .yr,.exp-item summary .tag{font-size:12px;color:var(--ink-60);letter-spacing:.1em}
+.exp-body{padding:0 0 clamp(28px,4vw,44px) calc(64px + clamp(12px,3vw,40px));max-width:52em;color:#333}
+.exp-body p{margin-bottom:16px}
+.exp-body .demo{margin-top:24px}
+
+/* 生成艺术画布（真实可运行的小实验） */
+.gen-canvas{
+  width:100%;aspect-ratio:16/9;background:#fafafa;border:1px solid var(--line);
+  display:block;cursor:crosshair;
+}
+.demo-note{margin-top:10px;font-size:12px;color:var(--ink-40);letter-spacing:.06em}
+
+/* ============ 8. Contact ============ */
+.contact-hero{padding:clamp(140px,20vh,220px) 0}
+.contact-hero h1{font-size:clamp(36px,6.6vw,96px);letter-spacing:-.03em;line-height:1.06;font-weight:600}
+.mail{
+  display:inline-block;margin-top:clamp(32px,5vw,56px);
+  font-size:clamp(20px,3vw,40px);font-weight:500;letter-spacing:-.01em;
+}
+.contact-links{margin-top:clamp(48px,7vw,88px);border-top:1px solid var(--line)}
+.contact-links a{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:clamp(18px,2.6vw,28px) 0;border-bottom:1px solid var(--line);
+  font-size:clamp(15px,1.6vw,19px);transition:padding-left .45s var(--ease);
+}
+.contact-links a:hover{padding-left:16px}
+.contact-links a .go{color:var(--ink-40);font-size:13px;letter-spacing:.1em}
+
+/* ============ 9. Footer ============ */
+footer{border-top:1px solid var(--line);margin-top:clamp(64px,9vw,120px)}
+.foot-inner{max-width:var(--maxw);margin:0 auto;padding:32px var(--gutter);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  font-size:12px;color:var(--ink-40);letter-spacing:.06em}
+
+/* ============ 10. 页面切换 & 响应式 ============ */
+#app{animation:pagein .6s var(--ease)}
+@keyframes pagein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+@media (max-width:960px){
+  .nav-menu{display:none}
+  .burger{display:block}
+  .works-grid{grid-template-columns:1fr}
+  .detail-meta{grid-template-columns:1fr 1fr;row-gap:28px}
+  .about-grid{grid-template-columns:1fr}
+  .about-grid .col-l{position:static}
+  .fig-row{grid-template-columns:1fr}
+  .exp-item summary{grid-template-columns:40px 1fr auto}
+  .exp-item summary .tag{display:none}
+  .exp-body{padding-left:calc(40px + clamp(12px,3vw,40px))}
+}
+@media (max-width:560px){
+  .hero h1{max-width:100%}
+  .detail-meta{grid-template-columns:1fr 1fr}
+  .card-info{flex-direction:column;gap:4px}
+  .card-info .tags{text-align:left}
+}
 </style>
 </head>
 <body>
 
-  <!-- 顶部：头像 + 姓名 + 简介 -->
-  <header>
-    <img class="avatar" src="https://picsum.photos/200/200" alt="头像占位">
-    <h1>你的名字</h1>
-    <p class="tagline">一名热爱创造的开发者，用代码构建有趣的东西。</p>
-  </header>
+<!-- 导航栏 -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#/"><span id="logo-name">Your Name</span><em id="logo-role">PORTFOLIO</em></a>
+    <div class="nav-menu" id="nav-menu">
+      <a href="#/" data-route="home" id="nav-home">首页</a>
+      <a href="#/#works" data-route="home">Selected Works</a>
+      <a href="#/experiments" data-route="experiments">Experiments</a>
+      <a href="#/about" data-route="about">About</a>
+      <a href="#/contact" data-route="contact">Contact</a>
+    </div>
+    <div class="nav-right">
+      <button class="lang-btn" id="lang-btn" aria-label="Switch language">EN / 中</button>
+      <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#/">Home</a>
+  <a href="#/#works">Selected Works</a>
+  <a href="#/experiments">Experiments</a>
+  <a href="#/about">About</a>
+  <a href="#/contact">Contact</a>
+</div>
 
-  <!-- 中部：作品卡片 -->
-  <main>
-    <h2>我的作品</h2>
-    <div class="cards">
-      <div class="card">
-        <img src="https://picsum.photos/600/400?random=1" alt="作品一">
-        <div class="card-body">
-          <h3>作品一</h3>
-          <p>这是第一个作品的简短介绍，说明它的功能与亮点。</p>
+<!-- 页面容器（SPA 渲染目标） -->
+<main id="app"></main>
+
+<footer>
+  <div class="foot-inner">
+    <span id="foot-c">© 2026 Your Name. All rights reserved.</span>
+    <span id="foot-l">Design & Code — Portfolio v1.0</span>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+  ① CONFIG — 站点与个人基础信息（请替换为你自己的信息）
+============================================================ */
+const CONFIG = {
+  name:    { zh: "你的名字", en: "Your Name" },
+  role:    { zh: "数字产品设计师 / 创意技术", en: "Digital Product Designer / Creative Technologist" },
+  email:   "hello@example.com",                 // ← 替换为真实邮箱
+  social:  [
+    // ← 替换为真实链接；不需要的可直接删除
+    { label: "Instagram", url: "#" },
+    { label: "Behance",   url: "#" },
+    { label: "Dribbble",  url: "#" },
+    { label: "GitHub",    url: "#" },
+    { label: "LinkedIn",  url: "#" },
+  ],
+  cvUrl:   "#",                                  // ← 简历文件（如 assets/CV.pdf）
+  location:{ zh: "上海 / 远程协作", en: "Shanghai / Remote" },
+};
+
+/* ============================================================
+  ② PROJECTS — 六个项目（中英文内容集中在各自 lang 字段）
+     img 路径指向 images/ 目录；文件不存在时显示灰色占位块。
+     替换方法：将真实图片放入 images/ 并保持文件名一致。
+============================================================ */
+const PROJECTS = [
+  {
+    id: "ev-charging",
+    year: "2024", category: { zh: "数字产品 · 移动端", en: "Digital Product · Mobile" },
+    role: { zh: "产品设计 · UX", en: "Product Design · UX" },
+    duration: { zh: "6 个月", en: "6 months" },
+    cover: "images/ev-charging/cover.jpg",
+    gallery: [
+      { src: "images/ev-charging/01.jpg", tall: false },
+      { src: "images/ev-charging/02.jpg", tall: true  },
+      { src: "images/ev-charging/03.jpg", tall: false },
+    ],
+    zh: {
+      title: "EV Charging App",
+      sub: "汽车充电 App — 从找桩到支付的全链路体验设计",
+      lead: "为新能源车主设计的充电服务应用，重新组织「寻找—充电—支付」的完整旅程。",
+      tags: "UI/UX · App · Service Design",
+      background: "项目背景待补充：请在此填写项目的商业背景、客户诉求与项目范围。",
+      goal: "设计目标待补充：请在此填写本项目的核心设计目标与衡量指标。",
+      users: [
+        "用户画像 01 — 待补充",
+        "用户画像 02 — 待补充",
+        "关键洞察 — 待补充",
+      ],
+      process: [
+        "阶段 01 — 待补充（如：用户研究与旅程梳理）",
+        "阶段 02 — 待补充（如：信息架构与线框）",
+        "阶段 03 — 待补充（如：视觉系统与高保真）",
+        "阶段 04 — 待补充（如：可用性测试与迭代）",
+      ],
+      outcome: "最终成果待补充：请在此填写上线结果、数据表现或作品影响，并替换上方占位图片。",
+    },
+    en: {
+      title: "EV Charging App",
+      sub: "End-to-end charging experience — from station discovery to payment",
+      lead: "A charging service app for EV owners, restructuring the full journey of locate, charge and pay.",
+      tags: "UI/UX · App · Service Design",
+      background: "Background placeholder — describe the business context, client ask and scope here.",
+      goal: "Goal placeholder — define the core design objectives and success metrics here.",
+      users: [
+        "Persona 01 — placeholder",
+        "Persona 02 — placeholder",
+        "Key insight — placeholder",
+      ],
+      process: [
+        "Phase 01 — placeholder (e.g. research & journey mapping)",
+        "Phase 02 — placeholder (e.g. IA & wireframes)",
+        "Phase 03 — placeholder (e.g. visual system & hi-fi)",
+        "Phase 04 — placeholder (e.g. usability testing & iteration)",
+      ],
+      outcome: "Outcome placeholder — describe launch results or impact, and replace the placeholder images above.",
+    },
+  },
+  {
+    id: "gesture-interaction",
+    year: "2024", category: { zh: "交互艺术 · 实时影像", en: "Interaction Art · Realtime" },
+    role: { zh: "创意编程 · 视觉", en: "Creative Coding · Visual" },
+    duration: { zh: "3 个月", en: "3 months" },
+    cover: "images/gesture-interaction/cover.jpg",
+    gallery: [
+      { src: "images/gesture-interaction/01.jpg", tall: false },
+      { src: "images/gesture-interaction/02.jpg", tall: true  },
+    ],
+    zh: {
+      title: "Gesture Interaction",
+      sub: "TouchDesigner 手势交互 — 身体即界面",
+      lead: "基于 TouchDesigner 与计算机视觉的手势驱动视觉系统，探索身体作为输入界面的可能性。",
+      tags: "TouchDesigner · CV · New Media",
+      background: "项目背景待补充。",
+      goal: "设计目标待补充。",
+      users: ["使用场景 01 — 待补充", "使用场景 02 — 待补充"],
+      process: ["阶段 01 — 待补充", "阶段 02 — 待补充", "阶段 03 — 待补充"],
+      outcome: "最终成果待补充。",
+    },
+    en: {
+      title: "Gesture Interaction",
+      sub: "TouchDesigner gesture system — the body as interface",
+      lead: "A gesture-driven visual system built with TouchDesigner and computer vision, exploring the body as an input interface.",
+      tags: "TouchDesigner · CV · New Media",
+      background: "Background placeholder.",
+      goal: "Goal placeholder.",
+      users: ["Scenario 01 — placeholder", "Scenario 02 — placeholder"],
+      process: ["Phase 01 — placeholder", "Phase 02 — placeholder", "Phase 03 — placeholder"],
+      outcome: "Outcome placeholder.",
+    },
+  },
+  {
+    id: "art-installation",
+    year: "2023", category: { zh: "空间 · 装置", en: "Spatial · Installation" },
+    role: { zh: "概念 · 空间视觉", en: "Concept · Spatial Visual" },
+    duration: { zh: "4 个月", en: "4 months" },
+    cover: "images/art-installation/cover.jpg",
+    gallery: [
+      { src: "images/art-installation/01.jpg", tall: false },
+      { src: "images/art-installation/02.jpg", tall: false },
+    ],
+    zh: {
+      title: "Art Installation",
+      sub: "艺术装置设计 — 光、空间与感知",
+      lead: "一件关于光与空间感知的沉浸式装置作品的概念与视觉设计。",
+      tags: "Installation · Light · Spatial",
+      background: "项目背景待补充。",
+      goal: "设计目标待补充。",
+      users: ["观众动线 — 待补充", "感知目标 — 待补充"],
+      process: ["阶段 01 — 待补充", "阶段 02 — 待补充"],
+      outcome: "最终成果待补充。",
+    },
+    en: {
+      title: "Art Installation",
+      sub: "Light, space and perception",
+      lead: "Concept and visual design for an immersive installation about light and spatial perception.",
+      tags: "Installation · Light · Spatial",
+      background: "Background placeholder.",
+      goal: "Goal placeholder.",
+      users: ["Visitor flow — placeholder", "Perception goal — placeholder"],
+      process: ["Phase 01 — placeholder", "Phase 02 — placeholder"],
+      outcome: "Outcome placeholder.",
+    },
+  },
+  {
+    id: "industrial-film",
+    year: "2023", category: { zh: "影像 · 动态", en: "Film · Motion" },
+    role: { zh: "美术指导 · 动态设计", en: "Art Direction · Motion" },
+    duration: { zh: "2 个月", en: "2 months" },
+    cover: "images/industrial-film/cover.jpg",
+    gallery: [
+      { src: "images/industrial-film/01.jpg", tall: false },
+      { src: "images/industrial-film/02.jpg", tall: true  },
+    ],
+    zh: {
+      title: "Industrial Film",
+      sub: "工业产品宣传影像 — 精密与秩序的视觉语言",
+      lead: "为工业产品线打造的宣传影像，以克制的镜头语言传达精密制造。",
+      tags: "Film · Art Direction",
+      background: "项目背景待补充。",
+      goal: "设计目标待补充。",
+      users: ["目标受众 — 待补充"],
+      process: ["阶段 01 — 待补充", "阶段 02 — 待补充"],
+      outcome: "最终成果待补充。",
+    },
+    en: {
+      title: "Industrial Film",
+      sub: "A visual language of precision and order",
+      lead: "A promotional film for an industrial product line, conveying precision manufacturing through restrained cinematography.",
+      tags: "Film · Art Direction",
+      background: "Background placeholder.",
+      goal: "Goal placeholder.",
+      users: ["Audience — placeholder"],
+      process: ["Phase 01 — placeholder", "Phase 02 — placeholder"],
+      outcome: "Outcome placeholder.",
+    },
+  },
+  {
+    id: "embodied-ai-twin",
+    year: "2025", category: { zh: "AI · 数字孪生 · 3D", en: "AI · Digital Twin · 3D" },
+    role: { zh: "产品设计 · 3D 视觉", en: "Product Design · 3D Visual" },
+    duration: { zh: "进行中", en: "Ongoing" },
+    cover: "images/embodied-ai-twin/cover.jpg",
+    gallery: [
+      { src: "images/embodied-ai-twin/01.jpg", tall: false },
+      { src: "images/embodied-ai-twin/02.jpg", tall: false },
+    ],
+    zh: {
+      title: "Embodied AI Digital Twin",
+      sub: "具身智能机器人数字孪生系统 — 物理世界的实时镜像",
+      lead: "为具身智能机器人构建的数字孪生监控与操控系统，连接物理实体与虚拟界面。",
+      tags: "Embodied AI · 3D · Dashboard",
+      background: "项目背景待补充。",
+      goal: "设计目标待补充。",
+      users: ["运维角色 — 待补充", "研发角色 — 待补充"],
+      process: ["阶段 01 — 待补充", "阶段 02 — 待补充"],
+      outcome: "最终成果待补充。",
+    },
+    en: {
+      title: "Embodied AI Digital Twin",
+      sub: "A realtime mirror of the physical world",
+      lead: "A digital twin monitoring & control system for embodied AI robots, bridging physical agents and virtual interfaces.",
+      tags: "Embodied AI · 3D · Dashboard",
+      background: "Background placeholder.",
+      goal: "Goal placeholder.",
+      users: ["Operator role — placeholder", "Researcher role — placeholder"],
+      process: ["Phase 01 — placeholder", "Phase 02 — placeholder"],
+      outcome: "Outcome placeholder.",
+    },
+  },
+  {
+    id: "generative-art",
+    year: "2023—今", category: { zh: "生成式艺术 · 创意编程", en: "Generative · Creative Coding" },
+    role: { zh: "创意编程", en: "Creative Coding" },
+    duration: { zh: "持续进行", en: "Ongoing" },
+    cover: "images/generative-art/cover.jpg",
+    gallery: [
+      { src: "images/generative-art/01.jpg", tall: false },
+    ],
+    zh: {
+      title: "Generative Art",
+      sub: "生成式艺术与创意编程 — 规则之下的偶然",
+      lead: "一系列基于算法规则与随机性的生成式视觉实验。",
+      tags: "Generative · p5.js · Algorithm",
+      background: "项目背景待补充。",
+      goal: "设计目标待补充。",
+      users: ["展示场景 — 待补充"],
+      process: ["阶段 01 — 待补充", "阶段 02 — 待补充"],
+      outcome: "最终成果待补充。",
+    },
+    en: {
+      title: "Generative Art",
+      sub: "Generative art & creative coding — accident within rules",
+      lead: "A series of generative visual experiments built on algorithmic rules and randomness.",
+      tags: "Generative · p5.js · Algorithm",
+      background: "Background placeholder.",
+      goal: "Goal placeholder.",
+      users: ["Exhibition context — placeholder"],
+      process: ["Phase 01 — placeholder", "Phase 02 — placeholder"],
+      outcome: "Outcome placeholder.",
+    },
+  },
+];
+
+/* ============================================================
+  ③ EXPERIMENTS — 创意实验（demo 字段指向可运行的画布实验）
+============================================================ */
+const EXPERIMENTS = [
+  {
+    id: "flow-field", year: "2024", tag: "Canvas",
+    zh: { title: "Flow Lines", desc: "基于正弦场驱动的流动线条实验。移动鼠标改变流向，点击重新生成。" },
+    en: { title: "Flow Lines", desc: "Flowing lines driven by a sine-based vector field. Move the cursor to shift the flow; click to regenerate." },
+    demo: "flow",
+  },
+  {
+    id: "noise-grid", year: "2024", tag: "Canvas",
+    zh: { title: "Noise Grid", desc: "网格单元随时间与鼠标位置起伏的呼吸式构图。" },
+    en: { title: "Noise Grid", desc: "A breathing composition — grid cells rise and fall with time and cursor position." },
+    demo: "grid",
+  },
+  {
+    id: "gen-typography", year: "2023", tag: "Type · Code",
+    zh: { title: "Generative Typography", desc: "文字被拆解为可运动的粒子系统（图片位待补充，此处为说明占位）。" },
+    en: { title: "Generative Typography", desc: "Letterforms deconstructed into a particle system (image slot reserved — placeholder text only)." },
+    demo: null,
+  },
+];
+
+/* ============================================================
+  ④ I18N — 界面文案（切换语言时全部同步）
+============================================================ */
+const I18N = {
+  zh: {
+    htmlLang: "zh-CN",
+    nav: { home: "首页", works: "精选作品", experiments: "实验", about: "关于", contact: "联系" },
+    hero: {
+      titleA: "设计", titleB: "是给复杂世界",
+      titleC: "的一个清晰回答。",
+      sub: "数字产品设计 · UI/UX · 交互艺术 · AI 创意设计 · 3D 视觉与数字孪生。",
+      based: "常驻", now: "状态 — 可接受新项目",
+      scroll: "向下滚动",
+    },
+    works: { title: "精选作品", sub: "Selected Works" },
+    home: {
+      introTitle: "实践",
+      intro: "我在产品、交互与创意技术之间工作，相信克制的视觉与严谨的系统能让复杂的想法变得清晰可感。",
+      allLink: "查看全部项目 →",
+    },
+    detail: {
+      year: "年份", role: "角色", category: "类别", duration: "周期",
+      background: "项目背景", goal: "设计目标", users: "用户分析", process: "设计过程", outcome: "最终成果",
+      next: "下一个项目", backAll: "所有作品",
+      imgNote: "占位图 — 请替换 images/ 目录下的同名文件",
+    },
+    about: {
+      title: "关于我",
+      p1: "【个人介绍（中文）待补充】请在此写 2—3 段中文自我介绍：教育背景、工作经历与关注领域。",
+      p2: "【设计理念（中文）待补充】请在此描述你的设计理念与工作方式。",
+      philosophyTitle: "设计理念",
+      philosophy: "【理念要点待补充】例如：系统优先于装饰；动效服务于信息；技术服务于体验。",
+      skillsTitle: "技能与工具",
+      skills: [
+        ["设计", "Figma · Sketch · After Effects · Blender"],
+        ["创意技术", "TouchDesigner · p5.js · Three.js · WebGL"],
+        ["AI", "生成式 AI 工作流 · Prompt Engineering · LLM Agent"],
+        ["工程", "HTML / CSS / JS · Python · Git"],
+        ["研究", "用户访谈 · 旅程图 · 可用性测试"],
+        ["语言", "中文（母语）· 英文（工作语言）"],
+      ],
+      portraitNote: "肖像占位 — 请替换 images/portrait.jpg",
+    },
+    exp: {
+      title: "实验",
+      sub: "Experiments — 创意编程 / 生成式 AI / 交互艺术",
+      note: "以下画布为实时运行的创意编程演示，非录屏。",
+      interact: "交互：移动鼠标 / 点击画布",
+    },
+    contact: {
+      titleA: "让我们", titleB: "一起做点东西。",
+      sayHi: "来信合作",
+      links: "更多链接",
+      cv: "下载简历",
+      location: "坐标",
+    },
+    footer: { c: "© 2026 你的名字。保留所有权利。", l: "设计与开发 — Portfolio v1.0" },
+  },
+  en: {
+    htmlLang: "en",
+    nav: { home: "Home", works: "Selected Works", experiments: "Experiments", about: "About", contact: "Contact" },
+    hero: {
+      titleA: "Design", titleB: "is a clear answer",
+      titleC: "to a complex world.",
+      sub: "Digital Product Design · UI/UX · Interaction Art · AI Creative · 3D & Digital Twin.",
+      based: "Based in", now: "Status — open for new projects",
+      scroll: "Scroll",
+    },
+    works: { title: "Selected Works", sub: "2019 — 2026" },
+    home: {
+      introTitle: "Practice",
+      intro: "I work between product, interaction and creative technology — believing restrained visuals and rigorous systems make complex ideas legible.",
+      allLink: "View all projects →",
+    },
+    detail: {
+      year: "Year", role: "Role", category: "Category", duration: "Duration",
+      background: "Background", goal: "Design Goal", users: "User Analysis", process: "Process", outcome: "Outcome",
+      next: "Next project", backAll: "All works",
+      imgNote: "Placeholder — replace the file under images/",
+    },
+    about: {
+      title: "About",
+      p1: "[Bio (EN) placeholder] Write 2–3 paragraphs about your background, experience and focus areas.",
+      p2: "[Philosophy (EN) placeholder] Describe your design philosophy and way of working.",
+      philosophyTitle: "Philosophy",
+      philosophy: "[Philosophy points placeholder] e.g. systems over decoration; motion serves information; technology serves experience.",
+      skillsTitle: "Skills & Tools",
+      skills: [
+        ["Design", "Figma · Sketch · After Effects · Blender"],
+        ["Creative Tech", "TouchDesigner · p5.js · Three.js · WebGL"],
+        ["AI", "Generative AI workflows · Prompt Engineering · LLM Agents"],
+        ["Engineering", "HTML / CSS / JS · Python · Git"],
+        ["Research", "User interviews · Journey maps · Usability testing"],
+        ["Languages", "Chinese (native) · English (working)"],
+      ],
+      portraitNote: "Portrait placeholder — replace images/portrait.jpg",
+    },
+    exp: {
+      title: "Experiments",
+      sub: "Creative coding / Generative AI / Interaction art",
+      note: "The canvases below run live in your browser — not recordings.",
+      interact: "Interact: move cursor / click the canvas",
+    },
+    contact: {
+      titleA: "Let's make", titleB: "something together.",
+      sayHi: "Say hi",
+      links: "Elsewhere",
+      cv: "Download CV",
+      location: "Location",
+    },
+    footer: { c: "© 2026 Your Name. All rights reserved.", l: "Design & Code — Portfolio v1.0" },
+  },
+};
+
+/* ============================================================
+  ⑤ 渲染器 — 各页面模板
+============================================================ */
+/* 语言优先级：URL 参数 ?lang=en > 本地记忆 > 默认中文 */
+let LANG = new URLSearchParams(location.search).get("lang")
+        || localStorage.getItem("pf-lang") || "zh";
+const t   = () => I18N[LANG];
+const tt  = (obj) => obj[LANG];                 // 取双字段的当前语言
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const app = document.getElementById("app");
+
+/* 图片标签：加载失败时退化为占位块（不伪造内容） */
+function imgTag(src, note, idx){
+  return `<img src="${esc(src)}" alt="" loading="lazy"
+            onerror="this.closest('.frame,.figure,.portrait')?.classList.add('noimg')">`
+       + `<div class="${note ? "ph-big" : "ph"}">`
+       + (note ? `<span class="big-idx mono">${String(idx).padStart(2,"0")}</span><span>${esc(note)}</span>` : `<span class="mono">${String(idx).padStart(2,"0")}</span>`)
+       + `</div>`;
+}
+
+/* —— 首页 —— */
+function pageHome(){
+  const h = t().hero;
+  return `
+  <section class="hero wrap reveal">
+    <h1>${esc(h.titleA)} <span class="thin">${esc(h.titleB)}</span><br>${esc(h.titleC)}</h1>
+    <div class="hero-sub">
+      <p class="zh">${esc(h.sub)}</p>
+      <div class="hero-meta">
+        <span>${esc(CONFIG.location[LANG])}</span>
+        <span>${esc(h.now)}</span>
+      </div>
+    </div>
+    <div class="hero-rule"><span>${esc(tt(CONFIG.name))} — ${esc(tt(CONFIG.role))}</span><span>${esc(h.scroll)} ↓</span></div>
+  </section>
+
+  <section class="sec" id="works">
+    <div class="wrap">
+      <div class="sec-head reveal">
+        <h2>${esc(t().works.title)}</h2>
+        <span class="count mono">${String(PROJECTS.length).padStart(2,"0")} / ${esc(t().works.sub)}</span>
+      </div>
+      <div class="grid works-grid">
+        ${PROJECTS.map((p,i)=>`
+        <a class="card reveal" href="#/work/${p.id}">
+          <div class="frame">
+            ${imgTag(p.cover, null, i+1)}
+          </div>
+          <span class="card-idx mono">${String(i+1).padStart(2,"0")}</span>
+          <div class="card-info">
+            <h3>${esc(tt({zh:p.zh.title,en:p.en.title}))}</h3>
+            <span class="tags mono">${esc(tt({zh:p.zh.tags,en:p.en.tags}))}</span>
+          </div>
+        </a>`).join("")}
+      </div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="wrap reveal">
+      <p class="eyebrow">${esc(t().home.introTitle)}</p>
+      <p style="margin-top:20px;max-width:46em;font-size:clamp(16px,1.8vw,22px);line-height:1.6">
+        ${esc(t().home.intro)}
+      </p>
+      <p style="margin-top:28px"><a class="u-link" href="#/about">${esc(t().home.allLink)}</a></p>
+    </div>
+  </section>`;
+}
+
+/* —— 项目详情页 —— */
+function pageDetail(id){
+  const p = PROJECTS.find(x=>x.id===id);
+  if(!p) return pageHome();
+  const d = t().detail, c = p[LANG];
+  const idx = PROJECTS.indexOf(p);
+  const next = PROJECTS[(idx+1) % PROJECTS.length];
+  const note = d.imgNote;
+  const fig = (g,i) => `
+    <figure class="figure reveal ${g.tall?"tall":""}">
+      ${imgTag(g.src, note, i+1)}
+    </figure>
+    <figcaption class="figure-caption mono reveal">${String(idx+1).padStart(2,"0")}-${String(i+1).padStart(2,"0")}</figcaption>`;
+
+  return `
+  <article class="detail-hero wrap">
+    <p class="eyebrow reveal">${esc(tt(p.category))} · ${esc(p.year)}</p>
+    <h1 class="reveal">${esc(c.title)}</h1>
+    <p class="lead reveal">${esc(c.lead)}</p>
+    <dl class="detail-meta reveal">
+      <div><dt>${esc(d.year)}</dt><dd>${esc(p.year)}</dd></div>
+      <div><dt>${esc(d.role)}</dt><dd>${esc(tt(p.role))}</dd></div>
+      <div><dt>${esc(d.category)}</dt><dd>${esc(tt(p.category))}</dd></div>
+      <div><dt>${esc(d.duration)}</dt><dd>${esc(tt(p.duration))}</dd></div>
+    </dl>
+    <figure class="figure reveal">${imgTag(p.cover, note, idx+1)}</figure>
+    <figcaption class="figure-caption mono reveal">${esc(c.sub)}</figcaption>
+  </article>
+
+  <div class="detail-body wrap">
+    <div class="block reveal"><h2>${esc(d.background)}</h2><p>${esc(c.background)}</p></div>
+    <div class="block reveal"><h2>${esc(d.goal)}</h2><p>${esc(c.goal)}</p></div>
+    <div class="block reveal">
+      <h2>${esc(d.users)}</h2>
+      <ul>${c.users.map((u,i)=>`<li><span class="n mono">${String(i+1).padStart(2,"0")}</span>${esc(u)}</li>`).join("")}</ul>
+    </div>
+    <div class="block reveal">
+      <h2>${esc(d.process)}</h2>
+      <ul>${c.process.map((s,i)=>`<li><span class="n mono">${String(i+1).padStart(2,"0")}</span>${esc(s)}</li>`).join("")}</ul>
+    </div>
+
+    <div class="block">
+      ${p.gallery.map((g,i)=> fig(g,i)).join("")}
+    </div>
+
+    <div class="block reveal"><h2>${esc(d.outcome)}</h2><p>${esc(c.outcome)}</p></div>
+  </div>
+
+  <nav class="next-proj">
+    <div class="wrap">
+      <a class="next-link" href="#/work/${next.id}">
+        <div>
+          <span class="dir">${esc(d.next)} →</span>
+          <h3>${esc(tt({zh:next.zh.title,en:next.en.title}))}</h3>
+        </div>
+        <span class="arrow">→</span>
+      </a>
+    </div>
+  </nav>`;
+}
+
+/* —— About —— */
+function pageAbout(){
+  const a = t().about;
+  return `
+  <section class="sec wrap" style="border-top:0;padding-top:clamp(120px,16vh,180px)">
+    <div class="about-grid">
+      <div class="col-l reveal">
+        <h1>${esc(a.title)}</h1>
+        <p>${esc(a.p1)}</p>
+        <div class="portrait">
+          <img src="images/portrait.jpg" alt="portrait" loading="lazy"
+               onerror="this.closest('.portrait').classList.add('noimg')">
+          <div class="ph-big">
+            <span class="big-idx mono">P.</span><span>${esc(a.portraitNote)}</span>
+          </div>
         </div>
       </div>
-      <div class="card">
-        <img src="https://picsum.photos/600/400?random=2" alt="作品二">
-        <div class="card-body">
-          <h3>作品二</h3>
-          <p>这是第二个作品的简短介绍，说明它的功能与亮点。</p>
+      <div>
+        <p class="reveal">${esc(a.p2)}</p>
+        <div class="block reveal" style="margin-top:clamp(40px,6vw,72px)">
+          <h2 style="font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-60);font-weight:600;
+                     display:flex;align-items:center;gap:14px;margin-bottom:22px">
+            ${esc(a.philosophyTitle)}<span style="flex:1;height:1px;background:var(--line)"></span>
+          </h2>
+          <p>${esc(a.philosophy)}</p>
         </div>
-      </div>
-      <div class="card">
-        <img src="https://picsum.photos/600/400?random=3" alt="作品三">
-        <div class="card-body">
-          <h3>作品三</h3>
-          <p>这是第三个作品的简短介绍，说明它的功能与亮点。</p>
+        <div class="reveal" style="margin-top:clamp(40px,6vw,72px)">
+          <h2 style="font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-60);font-weight:600;
+                     display:flex;align-items:center;gap:14px;margin-bottom:22px">
+            ${esc(a.skillsTitle)}<span style="flex:1;height:1px;background:var(--line)"></span>
+          </h2>
+          <dl class="skills">
+            ${a.skills.map(([k,v])=>`<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}
+          </dl>
         </div>
       </div>
     </div>
-  </main>
+  </section>`;
+}
 
-  <!-- 底部：联系方式 -->
-  <footer>
-    <div class="links">
-      <a href="mailto:you@example.com">📮 you@example.com</a>
-      <a href="https://github.com/yourname" target="_blank" rel="noopener">🐙 GitHub</a>
+/* —— Experiments —— */
+function pageExperiments(){
+  const e = t().exp;
+  return `
+  <section class="sec wrap" style="border-top:0;padding-top:clamp(120px,16vh,180px)">
+    <div class="sec-head reveal">
+      <h2>${esc(e.title)}</h2>
+      <span class="count">${esc(e.sub)}</span>
     </div>
-    <p class="copy">© 2026 你的名字 · 保留所有权利</p>
-  </footer>
+    <p class="reveal" style="color:var(--ink-60);margin-bottom:36px;max-width:46em">${esc(e.note)}</p>
+    <div class="exp-list reveal">
+      ${EXPERIMENTS.map((x,i)=>`
+      <details class="exp-item">
+        <summary>
+          <span class="no mono">${String(i+1).padStart(2,"0")}</span>
+          <h3>${esc(tt({zh:x.zh.title,en:x.en.title}))}</h3>
+          <span class="tag mono">${esc(x.tag)}</span>
+          <span class="yr mono">${esc(x.year)}</span>
+        </summary>
+        <div class="exp-body">
+          <p>${esc(tt({zh:x.zh.desc,en:x.en.desc}))}</p>
+          ${x.demo ? `
+          <div class="demo">
+            <canvas class="gen-canvas" data-demo="${x.demo}"></canvas>
+            <p class="demo-note mono">${esc(e.interact)}</p>
+          </div>` : ""}
+        </div>
+      </details>`).join("")}
+    </div>
+  </section>`;
+}
 
+/* —— Contact —— */
+function pageContact(){
+  const c = t().contact;
+  return `
+  <section class="contact-hero wrap">
+    <p class="eyebrow reveal">${esc(CONFIG.email)}</p>
+    <h1 class="reveal">${esc(c.titleA)}<br><span class="thin" style="font-weight:400;color:var(--ink-40)">${esc(c.titleB)}</span></h1>
+    <a class="mail u-link reveal" href="mailto:${esc(CONFIG.email)}">${esc(c.sayHi)} ↗</a>
+    <div class="contact-links reveal">
+      <a href="mailto:${esc(CONFIG.email)}"><span>Email</span><span class="go">${esc(CONFIG.email)}</span></a>
+      ${CONFIG.social.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener"><span class="u-link">${esc(s.label)}</span><span class="go">↗</span></a>`).join("")}
+      <a href="${esc(CONFIG.cvUrl)}" target="_blank" rel="noopener"><span class="u-link">${esc(c.cv)}</span><span class="go">PDF ↗</span></a>
+      <a href="#/about"><span>${esc(c.location)}</span><span class="go">${esc(CONFIG.location[LANG])}</span></a>
+    </div>
+  </section>`;
+}
+
+/* ============================================================
+  ⑥ 路由 — hash 驱动，支持 #/#works 锚点
+============================================================ */
+let io = null;
+
+function parseHash(){
+  const raw = location.hash.replace(/^#\/?/, "");   // 例: "work/ev-charging" / "about" / "#works"
+  const [path, anchor] = raw.split("#");
+  return { path: path || "", anchor };
+}
+
+function render(){
+  const { path, anchor } = parseHash();
+  window.scrollTo(0,0);
+
+  /* 清理上一页面可能存在的生成艺术画布动画 */
+  app.querySelectorAll("canvas[data-demo]").forEach(cv=>cv._cleanup && cv._cleanup());
+
+  if(path.startsWith("work/")){
+    app.innerHTML = pageDetail(path.slice(5));
+    document.title = `${tt({zh:"作品",en:"Work"})} — ${tt(CONFIG.name)}`;
+    setRoute("works");
+  } else if(path === "about"){
+    app.innerHTML = pageAbout(); setRoute("about");
+  } else if(path === "experiments"){
+    app.innerHTML = pageExperiments(); setRoute("experiments");
+    initCanvases();
+  } else if(path === "contact"){
+    app.innerHTML = pageContact(); setRoute("contact");
+  } else {
+    app.innerHTML = pageHome(); setRoute("home");
+    document.title = `${tt(CONFIG.name)} — Portfolio`;
+  }
+
+  syncChrome();          // 导航/页脚文案随语言刷新
+  observeReveals();      // 重新挂载滚动淡入
+  if(anchor){
+    const el = document.getElementById(anchor);
+    if(el) setTimeout(()=>el.scrollIntoView({behavior:"smooth"}), 60);
+  }
+}
+
+function setRoute(r){
+  document.querySelectorAll(".nav-menu a").forEach(a=>{
+    a.classList.toggle("active", a.dataset.route === r);
+  });
+}
+
+addEventListener("hashchange", render);
+
+/* ============================================================
+  ⑦ 交互逻辑
+============================================================ */
+/* 滚动淡入（IntersectionObserver） */
+function observeReveals(){
+  if(io) io.disconnect();
+  io = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); }
+    });
+  },{ threshold:.08, rootMargin:"0px 0px -4% 0px" });
+  document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+}
+
+/* 语言切换：刷新 html lang、导航、页脚与当前页面 */
+function syncChrome(){
+  const n = t().nav;
+  document.getElementById("logo-name").textContent = tt(CONFIG.name);
+  document.getElementById("logo-role").textContent  = tt(CONFIG.role).split(" / ")[0].toUpperCase();
+  document.getElementById("nav-home").textContent  = n.home;
+  document.querySelector('[href="#/#works"]').textContent = n.works;
+  document.querySelector('[href="#/experiments"]').textContent = n.experiments;
+  document.querySelector('[href="#/about"]').textContent = n.about;
+  document.querySelector('[href="#/contact"]').textContent = n.contact;
+  document.getElementById("foot-c").textContent = t().footer.c;
+  document.getElementById("foot-l").textContent = t().footer.l;
+  const mm = document.getElementById("mobile-menu");
+  mm.children[0].textContent = n.home;
+  mm.children[1].textContent = n.works;
+  mm.children[2].textContent = n.experiments;
+  mm.children[3].textContent = n.about;
+  mm.children[4].textContent = n.contact;
+}
+
+document.getElementById("lang-btn").addEventListener("click", ()=>{
+  LANG = LANG === "zh" ? "en" : "zh";
+  localStorage.setItem("pf-lang", LANG);
+  document.documentElement.lang = t().htmlLang;
+  render();
+});
+
+/* 移动端菜单 */
+const burger = document.getElementById("burger");
+const mobileMenu = document.getElementById("mobile-menu");
+burger.addEventListener("click", ()=>{
+  burger.classList.toggle("open");
+  mobileMenu.classList.toggle("show");
+});
+mobileMenu.addEventListener("click", (e)=>{
+  if(e.target.tagName === "A"){ burger.classList.remove("open"); mobileMenu.classList.remove("show"); }
+});
+
+/* —— 生成艺术画布（Experiments 页，真实运行） —— */
+function initCanvases(){
+  document.querySelectorAll("canvas[data-demo]").forEach(cv=>{
+    const kind = cv.dataset.demo;
+    const ctx = cv.getContext("2d");
+    let W,H,raf,pointer = {x:.5,y:.5}, t0 = 0;
+
+    function fit(){
+      const r = cv.getBoundingClientRect();
+      const dpr = Math.min(devicePixelRatio||1, 2);
+      W = r.width; H = r.height;
+      cv.width = W*dpr; cv.height = H*dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    fit();
+    const ro = new ResizeObserver(fit); ro.observe(cv);
+
+    cv.addEventListener("pointermove", e=>{
+      const r = cv.getBoundingClientRect();
+      pointer.x = (e.clientX-r.left)/r.width;
+      pointer.y = (e.clientY-r.top)/r.height;
+    });
+    cv.addEventListener("click", ()=>{ t0 = 0; });
+
+    /* 流动线条：正弦向量场 + 粒子轨迹 */
+    const flow = ()=>{
+      ctx.fillStyle = "rgba(250,250,250,.08)";
+      ctx.fillRect(0,0,W,H);
+      const n = 90, m = t0;
+      for(let i=0;i<n;i++){
+        ctx.beginPath();
+        let x = (i/n)*W, y = H*.5;
+        for(let s=0;s<60;s++){
+          const ang = Math.sin(x*.008 + m*.6 + pointer.x*6)
+                    + Math.cos(y*.008 - m*.4 + pointer.y*4);
+          x += Math.cos(ang*Math.PI)*2.2;
+          y += Math.sin(ang*Math.PI)*2.2;
+          if(s===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+        }
+        const a = .06 + .1*((i%7)/7);
+        ctx.strokeStyle = `rgba(17,17,17,${a})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      t0 += .012;
+    };
+
+    /* 噪声网格：单元格随时间与指针呼吸 */
+    const grid = ()=>{
+      ctx.clearRect(0,0,W,H);
+      const cols = 46, rows = Math.round(cols*H/W);
+      const cw = W/cols, ch = H/rows;
+      for(let i=0;i<cols;i++){
+        for(let j=0;j<rows;j++){
+          const v = Math.sin(i*.35 + t0) * Math.cos(j*.35 - t0*.7);
+          const d = Math.hypot(i/cols - pointer.x, j/rows - pointer.y);
+          const amp = Math.max(0, 1 - d*2.2);
+          const s = (v*.5+.5)*.55 + amp*.45;
+          const sz = Math.min(cw,ch)*.62*s;
+          ctx.fillStyle = s > .82 ? "#111" : (s > .55 ? "#555" : "#c9c9c9");
+          ctx.fillRect(i*cw + (cw-sz)/2, j*ch + (ch-sz)/2, sz, sz);
+        }
+      }
+      t0 += .02;
+    };
+
+    (function loop(){ (kind==="flow"?flow:grid)(); raf = requestAnimationFrame(loop); })();
+    cv._cleanup = ()=>{ cancelAnimationFrame(raf); ro.disconnect(); };
+  });
+}
+
+/* 初始化 */
+document.documentElement.lang = t().htmlLang;
+render();
+</script>
 </body>
 </html>
