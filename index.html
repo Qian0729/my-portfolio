@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>你的名字 · 个人作品集</title>
+<style>
+  :root {
+    --grad: linear-gradient(135deg, #6366f1, #8b5cf6);
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--text-main);
+    background: #f8fafc;
+    line-height: 1.6;
+  }
+
+  /* ===== 顶部 Hero ===== */
+  header {
+    text-align: center;
+    padding: 90px 20px 70px;
+    background: var(--grad);
+    color: #fff;
+  }
+  .avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    margin-bottom: 28px;
+  }
+  header h1 {
+    font-size: 44px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+  header p.tagline {
+    font-size: 22px;
+    opacity: 0.92;
+    font-weight: 300;
+  }
+
+  /* ===== 作品区 ===== */
+  main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 70px 24px;
+  }
+  main h2 {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 48px;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.12);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px rgba(139, 92, 246, 0.25);
+  }
+  .card img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    display: block;
+  }
+  .card-body { padding: 22px 24px 26px; }
+  .card h3 { font-size: 20px; margin-bottom: 8px; }
+  .card p { font-size: 15px; color: var(--text-sub); }
+
+  /* ===== 底部联系方式 ===== */
+  footer {
+    text-align: center;
+    padding: 48px 20px;
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+  }
+  footer .links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 36px;
+    font-size: 20px;
+  }
+  footer a {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: color 0.2s;
+  }
+  footer a:hover { color: #6366f1; }
+  footer .copy {
+    margin-top: 26px;
+    font-size: 14px;
+    color: var(--text-sub);
+  }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 32px; }
+    header p.tagline { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- 顶部：头像 + 姓名 + 简介 -->
+  <header>
+    <img class="avatar" src="https://picsum.photos/200/200" alt="头像占位">
+    <h1>你的名字</h1>
+    <p class="tagline">一名热爱创造的开发者，用代码构建有趣的东西。</p>
+  </header>
+
+  <!-- 中部：作品卡片 -->
+  <main>
+    <h2>我的作品</h2>
+    <div class="cards">
+      <div class="card">
+        <img src="https://picsum.photos/600/400?random=1" alt="作品一">
+        <div class="card-body">
+          <h3>作品一</h3>
+          <p>这是第一个作品的简短介绍，说明它的功能与亮点。</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://picsum.photos/600/400?random=2" alt="作品二">
+        <div class="card-body">
+          <h3>作品二</h3>
+          <p>这是第二个作品的简短介绍，说明它的功能与亮点。</p>
+        </div>
+      </div>
+      <div class="card">
+        <img src="https://picsum.photos/600/400?random=3" alt="作品三">
+        <div class="card-body">
+          <h3>作品三</h3>
+          <p>这是第三个作品的简短介绍，说明它的功能与亮点。</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- 底部：联系方式 -->
+  <footer>
+    <div class="links">
+      <a href="mailto:you@example.com">📮 you@example.com</a>
+      <a href="https://github.com/yourname" target="_blank" rel="noopener">🐙 GitHub</a>
+    </div>
+    <p class="copy">© 2026 你的名字 · 保留所有权利</p>
+  </footer>
+
+</body>
+</html>
